@@ -39,7 +39,7 @@ window.App = {
       accounts = accs;
       account = accounts[0];
 
-      self.refreshBalance();
+      self.refreshProjects();
     });
   },
 
@@ -48,42 +48,59 @@ window.App = {
     status.innerHTML = message;
   },
 
-  refreshBalance: function() {
+  refreshProjects: function() {
     var self = this;
 
-    var meta;
+    var hub;
     FundingHub.deployed().then(function(instance) {
-      meta = instance;
-      return meta.getBalance.call(account, {from: account});
+      hub = instance;
+      return hub.project.call();
     }).then(function(value) {
-      var balance_element = document.getElementById("balance");
-      balance_element.innerHTML = value.valueOf();
+      var projects_element = document.getElementById("projects");
+      projects_element.innerHTML = value.valueOf();
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error getting balance; see log.");
+      self.setStatus("Error getting projects; see log.");
     });
   },
 
-  sendCoin: function() {
-    var self = this;
+  createProject: function() {
+    var hub;
 
-    var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
-    }).then(function() {
-      self.setStatus("Transaction complete!");
-      self.refreshBalance();
+    FundingHub.deployed().then(function(instance) {
+      hub = instance;
+      var totalAmount = document.getElementById("totalAmount").value || 100; 
+      var deadline = document.getElementById("deadline").value || 100; 
+      return hub.createProject.call(totalAmount, deadline, {from: account});
+    }).then(function(value) {
+      var projectAddress_element = document.getElementById("projectAddress");
+      projectAddress_element.innerHTML = value.valueOf();
     }).catch(function(e) {
       console.log(e);
-      self.setStatus("Error sending coin; see log.");
+      self.setStatus("Error creating project; see log.");
     });
   }
+
+  // sendCoin: function() {
+  //   var self = this;
+
+  //   var amount = parseInt(document.getElementById("amount").value);
+  //   var receiver = document.getElementById("receiver").value;
+
+  //   this.setStatus("Initiating transaction... (please wait)");
+
+  //   var meta;
+  //   MetaCoin.deployed().then(function(instance) {
+  //     meta = instance;
+  //     return meta.sendCoin(receiver, amount, {from: account});
+  //   }).then(function() {
+  //     self.setStatus("Transaction complete!");
+  //     self.refreshBalance();
+  //   }).catch(function(e) {
+  //     console.log(e);
+  //     self.setStatus("Error sending coin; see log.");
+  //   });
+  // }
 };
 
 window.addEventListener('load', function() {
