@@ -9,7 +9,8 @@
   <h1>FundingHub</h1>
   <h2>Track your crowdfunding projects</h2>
   <h3>Active projects: <span class="black"><span id="projects"></span></span></h3>
-
+  <button id="fetchProjects" onclick="App.fetchProjects()">Fetch projects</button>
+  <br>
   <!-- <br>
   <h1>Send MetaCoin</h1>
   <br><label for="amount">Amount:</label><input type="text" id="amount" placeholder="e.g., 95"></input>
@@ -20,8 +21,8 @@
   <h1>Create new project</h1>
   <br><label for="totalAmount">Total amount:</label><input type="text" id="totalAmount" placeholder="e.g., 95"></input>
   <br><label for="deadline">Deadline:</label><input type="text" id="deadline" placeholder="e.g., 95"></input>
-  <br><button id="create" onclick="App.createProject()">Create project</button>
-  <br><span class="black" id="projectAddress"></span>
+  <br><br><button id="create" onclick="App.createProject()">Create project</button>
+  <h3>New project address:<span class="black" id="projectAddress"></span></h3>
   <br>
   <br>
   <span id="status"></span>

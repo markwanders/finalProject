@@ -39,7 +39,7 @@ window.App = {
       accounts = accs;
       account = accounts[0];
 
-      self.refreshProjects();
+      self.fetchProjects();
     });
   },
 
@@ -48,20 +48,34 @@ window.App = {
     status.innerHTML = message;
   },
 
-  refreshProjects: function() {
+  fetchProjects: function() {
     var self = this;
-
+    var results = [];
     var hub;
     FundingHub.deployed().then(function(instance) {
       hub = instance;
-      return hub.project.call();
-    }).then(function(value) {
-      var projects_element = document.getElementById("projects");
-      projects_element.innerHTML = value.valueOf();
+      hub.getProjectCount().then(function(count) {
+
+        if(count.valueOf() > 0) {
+          for (var i = 0; i < count.valueOf(); i++) {
+            hub.getProjectAt(i).
+              then(function(result) {
+                results.push(result);
+              }).then(function() {
+                var projects_element = document.getElementById("projects");
+                projects_element.innerHTML = results || 'None';
+              }).catch(function(e) {
+                console.log(e);
+                self.setStatus("Error getting projects; see log.");
+              });
+          }
+        }
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error getting projects; see log.");
-    });
+    })
+  });
+  
   },
 
   createProject: function() {
