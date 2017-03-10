@@ -10,6 +10,8 @@ contract Project {
 		uint deadline;
 	}
 
+	event ProjectCreated(address owner);
+
 	Campaign public campaign;
 
 	function Project(uint amount, uint deadline) {
@@ -18,6 +20,7 @@ contract Project {
 		//the amount to be raised (eg 100000 wei)
 		//the deadline, i.e. the time until when the amount has to be raised
 		campaign = Campaign(msg.sender, amount, deadline);
+		ProjectCreated(msg.sender);
 	}
 
 	mapping (address => uint) balances;

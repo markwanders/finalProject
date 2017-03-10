@@ -7,9 +7,11 @@ import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
 import fundinghub_artifacts from '../../build/contracts/FundingHub.json'
+import project_artifacts from '../../build/contracts/Project.json'
 
 // FundingHub is our usable abstraction, which we'll use through the code below.
 var FundingHub = contract(fundinghub_artifacts);
+var Project = contract(project_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
@@ -54,16 +56,16 @@ window.App = {
     var hub;
     FundingHub.deployed().then(function(instance) {
       hub = instance;
-      hub.getProjectCount().then(function(count) {
+      hub.getProjectCount.call().then(function(count) {
 
         if(count.valueOf() > 0) {
           for (var i = 0; i < count.valueOf(); i++) {
-            hub.getProjectAt(i).
+            hub.getProjectAt.call(i).
               then(function(result) {
                 results.push(result);
               }).then(function() {
                 var projects_element = document.getElementById("projects");
-                projects_element.innerHTML = results || 'None';
+                projects_element.innerHTML = results[0] || 'None';
               }).catch(function(e) {
                 console.log(e);
                 self.setStatus("Error getting projects; see log.");
@@ -78,13 +80,28 @@ window.App = {
   
   },
 
+  getDetails: function() {
+    var address = document.getElementById("projects").innerHTML;
+    var proj;
+    var project = Project(address);
+    Project.deployed().then(function(instance) {
+      proj = instance;
+      project.getCampaign().then(function(result) {
+        console.log(result);
+      }).catch(function(e) {
+        console.log(e);
+        self.setStatus("Error getting project details; see log.");
+      });
+    });
+  },
+
   createProject: function() {
     var hub;
 
     FundingHub.deployed().then(function(instance) {
       hub = instance;
-      var totalAmount = document.getElementById("totalAmount").value || 100; 
-      var deadline = document.getElementById("deadline").value || 100; 
+      var totalAmount = document.getElementById("totalAmount").value; 
+      var deadline = document.getElementById("deadline").value; 
       return hub.createProject.call(totalAmount, deadline, {from: account});
     }).then(function(value) {
       var projectAddress_element = document.getElementById("projectAddress");
