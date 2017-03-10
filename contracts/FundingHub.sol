@@ -2,13 +2,9 @@ pragma solidity ^0.4.2;
 
 import "./Project.sol";
 
-contract Bla {
-
-}
-
 contract FundingHub {
 
-	address[] private projects;
+	address[] public projects;
 
 	event ProjectAdded(address project);
 
