@@ -56,11 +56,11 @@ window.App = {
     var hub;
     FundingHub.deployed().then(function(instance) {
       hub = instance;
-      hub.getProjectCount.call().then(function(count) {
-
+      hub.getProjectCount().then(function(count) {
+        console.log(count.valueOf());
         if(count.valueOf() > 0) {
           for (var i = 0; i < count.valueOf(); i++) {
-            hub.getProjectAt.call(i).
+            hub.getProjectAt(i).
               then(function(result) {
                 results.push(result);
               }).then(function() {
