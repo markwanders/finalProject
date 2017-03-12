@@ -1,8 +1,9 @@
 var FundingHub = artifacts.require("./contracts/FundingHub.sol");
+var Project = artifacts.require("./contracts/Project.sol");
 
 contract("FundingHub", function(accounts) {
 
-    it("Should return the projected created during migration", function() {
+    it("Should return the project created during migration", function() {
 
         return FundingHub.deployed().then(function(hub) {
           // now check the count
@@ -39,6 +40,14 @@ contract("FundingHub", function(accounts) {
                   .then(function(_newAddress) {
                     console.log("The new Project address in the array is", _newAddress.valueOf());
                     assert.isAbove(_newAddress,"0x0", "The new address in the array is empty");
+                    return Project.at(_newAddress)
+                    .then(function(projectInstance) {
+                      return projectInstance.campaign()
+                      .then(function(campaign) {
+                        console.log("The new project campaign is ", campaign);
+                        assert.equal(campaign[1].valueOf(), 1, "The new campaign amount is not 1")
+                      })
+                    })
                   })
                 }) 
               })
