@@ -12,12 +12,12 @@ contract FundingHub {
 		//FundingHub is the registry of all Projects to be funded. FundingHub should have a constructor
 	}
 
-	function createProject(uint amount, uint deadline) returns(address newProject) {
+	function createProject(uint amount, uint deadline) returns(address project) {
 		// This function should allow a user to add a new project to the FundingHub. The function should deploy a new Project contract and keep track of its address. The createProject() function should accept all constructor values that the Project contract requires.
-		newProject = new Project(amount, deadline);
-		projects.push(newProject);
-		ProjectAdded(newProject);		
-		return newProject;
+		project = new Project(amount, deadline);
+		projects.push(project);
+		ProjectAdded(project);		
+		return project;
 	}
 
 	function contribute(address project, uint amount) {

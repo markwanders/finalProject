@@ -25,6 +25,7 @@ window.App = {
 
     // Bootstrap the FundingHub abstraction for Use.
     FundingHub.setProvider(web3.currentProvider);
+    Project.setProvider(web3.currentProvider);
 
     // Get the initial account balance so it can be displayed.
     web3.eth.getAccounts(function(err, accs) {
@@ -57,7 +58,6 @@ window.App = {
     FundingHub.deployed().then(function(instance) {
       hub = instance;
       hub.getProjectCount().then(function(count) {
-        console.log(count.valueOf());
         if(count.valueOf() > 0) {
           for (var i = 0; i < count.valueOf(); i++) {
             hub.getProjectAt(i).
@@ -86,7 +86,7 @@ window.App = {
     var project = Project(address);
     Project.deployed().then(function(instance) {
       proj = instance;
-      project.getCampaign().then(function(result) {
+      project.campaign().then(function(result) {
         console.log(result);
       }).catch(function(e) {
         console.log(e);
@@ -102,10 +102,11 @@ window.App = {
       hub = instance;
       var totalAmount = document.getElementById("totalAmount").value; 
       var deadline = document.getElementById("deadline").value; 
-      return hub.createProject.call(totalAmount, deadline, {from: account});
-    }).then(function(value) {
-      var projectAddress_element = document.getElementById("projectAddress");
-      projectAddress_element.innerHTML = value.valueOf();
+      return hub.createProject.sendTransaction(totalAmount, deadline, {from: account, gas: 2000000})
+      .then(function(value) {
+        var projectAddress_element = document.getElementById("projectAddress");
+        projectAddress_element.innerHTML = value.valueOf();
+      })
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error creating project; see log.");

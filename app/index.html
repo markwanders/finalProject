@@ -8,15 +8,15 @@
 <body>
   <h1>FundingHub</h1>
   <h2>Track your crowdfunding projects</h2>
-  <button id="fetchProjects" onclick="App.fetchProjects()">Fetch projects</button>
   <h3>Active projects: <span class="black" id="projects" onclick="App.getDetails()"></span></h3>
+  <button id="fetchProjects" onclick="App.fetchProjects()">Reload projects</button>
   <br>
   <br>
   <h1>Create new project</h1>
   <br><label for="totalAmount">Total amount:</label><input type="text" id="totalAmount" placeholder="e.g., 95" value="95"></input>
   <br><label for="deadline">Deadline:</label><input type="text" id="deadline" placeholder="e.g., 95" value="95"></input>
   <br><br><button id="create" onclick="App.createProject()">Create project</button>
-  <h3>New project address:<span class="black" id="projectAddress"></span></h3>
+  <h3>Project address: <span class="black" id="projectAddress"></span></h3>
   <br>
   <br>
   <span id="status"></span>
