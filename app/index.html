@@ -8,14 +8,25 @@
 <body>
   <h1>FundingHub</h1>
   <h2>Track your crowdfunding projects</h2>
-  <h3>Active projects: <span class="black" id="projects" onclick="App.getDetails()"></span></h3>
+  <h3>Active projects: <a href="#" class="black" id="projects" onclick="App.getDetails()"></a></h3>
   <button id="fetchProjects" onclick="App.fetchProjects()">Reload projects</button>
   <br>
+  <h3>Project details:</h3>
+  <label for="projectOwner">Owner:</label> <span class="black" id="projectOwner"></span><br>
+  <label for="projectAmount">Amount:</label><span class="black" id="projectAmount"></span><br>
+ <label for="projectDeadline">Deadline:</label> <span class="black" id="projectDeadline"></span>
   <br>
-  <h1>Create new project</h1>
-  <br><label for="totalAmount">Total amount:</label><input type="text" id="totalAmount" placeholder="e.g., 95" value="95"></input>
-  <br><label for="deadline">Deadline:</label><input type="text" id="deadline" placeholder="e.g., 95" value="95"></input>
-  <br><br><button id="create" onclick="App.createProject()">Create project</button>
+  <br>
+  <h2>Create new project</h1>
+  <table>
+    <tr>
+      <td><label for="totalAmount">Total amount:</label></td><td><input type="text" id="totalAmount" placeholder="e.g., 95" value="95"></input></td>
+    </tr>
+    <tr>
+      <td><label for="deadline">Deadline:</label></td><td><input type="text" id="deadline" placeholder="e.g., 95" value="95"></input></td>
+    </tr>
+    <tr><td colspan="2"><button id="create" onclick="App.createProject()">Create project</button></td></tr>
+  </table>
   <h3>Project address: <span class="black" id="projectAddress"></span></h3>
   <br>
   <br>

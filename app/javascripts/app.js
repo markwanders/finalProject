@@ -82,16 +82,21 @@ window.App = {
 
   getDetails: function() {
     var address = document.getElementById("projects").innerHTML;
-    var proj;
-    var project = Project(address);
-    Project.deployed().then(function(instance) {
-      proj = instance;
+    Project.at(address)
+    .then(function(project) {
       project.campaign().then(function(result) {
-        console.log(result);
-      }).catch(function(e) {
-        console.log(e);
-        self.setStatus("Error getting project details; see log.");
-      });
+      var project_owner_element = document.getElementById("projectOwner");
+      var project_amount_element = document.getElementById("projectAmount");
+      var project_deadline_element = document.getElementById("projectDeadline");
+
+      project_owner_element.innerHTML = result[0];
+      project_amount_element.innerHTML = result[1].valueOf();
+      project_deadline_element.innerHTML = result[2].valueOf();    
+      })
+    })
+    .catch(function(e) {
+      console.log(e);
+      self.setStatus("Error getting project details; see log.");
     });
   },
 
