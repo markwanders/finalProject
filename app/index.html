@@ -3,34 +3,44 @@
 <head>
   <title>FundingHub - Track your crowdfunding projects</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-  <script src="./app.js"></script>
+  <script src="./fundingHubCtrl.js"></script>
 </head>
-<body>
+<body ng-app="fundingHubApp" ng-controller="fundingHubCtrl" ng-cloak>
   <h1>FundingHub</h1>
   <h2>Track your crowdfunding projects</h2>
-  <h3>Active projects: <a href="#" class="black" id="projects" onclick="App.getDetails()"></a></h3>
-  <button id="fetchProjects" onclick="App.fetchProjects()">Reload projects</button>
+  <h3>Active projects:</h3>
+  <ul ng-repeat="x in projects">
+    <li href="#" class="black" id="projects{{$index}}"><a href="#details"  ng-click="getDetails($index)">{{x}}</a></li>
+  </ul>
   <br>
-  <h3>Project details:</h3>
-  <label for="projectOwner">Owner:</label> <span class="black" id="projectOwner"></span><br>
-  <label for="projectAmount">Amount:</label><span class="black" id="projectAmount"></span><br>
- <label for="projectDeadline">Deadline:</label> <span class="black" id="projectDeadline"></span>
+  <button id="fetchProjects" ng-click="fetchProjects()">Reload projects</button>
+  <br>
+  <a name="details"></a>
+  <div ng-show="showDetails">
+    <h3>Project details:</h3>
+    <dl>
+      <dt><label for="projectAddress">Address:</label></dt><dd class="black" id="projectAddress">{{projectAddress}}</dd><br>
+      <dt><label for="projectOwner">Owner:</label></dt><dd class="black" id="projectOwner">{{projectOwner}}</dd><br>
+      <dt><label for="projectAmount">Amount:</label></dt><dd class="black" id="projectAmount">{{projectAmount}}</dd><br>
+      <dt><label for="projectDeadline">Deadline:</label></dt><dd class="black" id="projectDeadline">{{projectDeadline}}</dd>
+    </dl>
+    </div>
   <br>
   <br>
   <h2>Create new project</h1>
   <table>
     <tr>
-      <td><label for="totalAmount">Total amount:</label></td><td><input type="text" id="totalAmount" placeholder="e.g., 95" value="95"></input></td>
+      <td><label for="totalAmount">Total amount:</label></td><td><input type="text" ng-model="totalAmount" id="totalAmount" placeholder="e.g., 95" size="10"></input></td>
     </tr>
     <tr>
-      <td><label for="deadline">Deadline:</label></td><td><input type="text" id="deadline" placeholder="e.g., 95" value="95"></input></td>
+      <td><label for="deadline">Deadline:</label></td><td><input type="text" ng-model="deadline" id="deadline" placeholder="e.g., 95" size="10"></input></td>
     </tr>
-    <tr><td colspan="2"><button id="create" onclick="App.createProject()">Create project</button></td></tr>
+    <tr><td colspan="2"><button id="create" ng-click="createProject()">Create project</button></td></tr>
   </table>
-  <h3>Project address: <span class="black" id="projectAddress"></span></h3>
+  <h3>Transaction receipt: <span class="black">{{receipt}}</span></h3>
   <br>
   <br>
-  <span id="status"></span>
+  <span id="status">{{status}}</span>
   <br>
   <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
 </body>
