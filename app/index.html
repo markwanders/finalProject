@@ -21,23 +21,29 @@
     <dl>
       <dt><label for="projectAddress">Address:</label></dt><dd class="black" id="projectAddress">{{projectAddress}}</dd><br>
       <dt><label for="projectOwner">Owner:</label></dt><dd class="black" id="projectOwner">{{projectOwner}}</dd><br>
-      <dt><label for="projectAmount">Amount:</label></dt><dd class="black" id="projectAmount">{{projectAmount}}</dd><br>
-      <dt><label for="projectDeadline">Deadline:</label></dt><dd class="black" id="projectDeadline">{{projectDeadline}}</dd>
+      <dt><label for="projectAmount">Amount to be raised:</label></dt><dd class="black" id="projectAmount">{{projectAmount}} ether</dd><br>
+      <dt><label for="projectAmount">Amount raised so far:</label></dt><dd class="black" id="projectAmount">{{projectBalance}} ether</dd><br>
+      <dt><label for="projectDeadline">Deadline for contributions:</label></dt><dd class="black" id="projectDeadline">{{projectDeadline}} seconds from now</dd>
+      <dt><label for="contribute">Amount to contribute:</label></dt>
+      <dd><input type="number" ng-model="contribution" id="contribution"> <button type="button" ng-click="contribute()">Contribute</button></dd>
+      <dt><label for="accountBalance">(Your current balance:)</label></dt><dd>{{accountBalance}} ether</dd>
     </dl>
-    </div>
+  </div>
   <br>
   <br>
   <h2>Create new project</h1>
   <table>
     <tr>
-      <td><label for="totalAmount">Total amount:</label></td><td><input type="text" ng-model="totalAmount" id="totalAmount" placeholder="e.g., 95" size="10"></input></td>
+      <td><label for="totalAmount">Total amount: </label></td>
+      <td><input type="text" ng-model="totalAmount" id="totalAmount" placeholder="e.g., 95" size="10"></input> ether</td>
     </tr>
     <tr>
-      <td><label for="deadline">Deadline:</label></td><td><input type="text" ng-model="deadline" id="deadline" placeholder="e.g., 95" size="10"></input></td>
+      <td><label for="deadline">Deadline: </label></td>
+      <td><input type="text" ng-model="deadline" id="deadline" placeholder="e.g., 95" size="10"></input> seconds from now</td>
     </tr>
     <tr><td colspan="2"><button id="create" ng-click="createProject()">Create project</button></td></tr>
   </table>
-  <h3>Transaction receipt: <span class="black">{{receipt}}</span></h3>
+  <h3 ng-if="receipt">Transaction receipt: <span class="black">{{receipt}}</span></h3>
   <br>
   <br>
   <span id="status">{{status}}</span>

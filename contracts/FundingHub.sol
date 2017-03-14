@@ -8,6 +8,8 @@ contract FundingHub {
 
 	event ProjectAdded(address project);
 
+	event ContributedToProject(address project);
+
 	function FundingHub() {
 		//FundingHub is the registry of all Projects to be funded. FundingHub should have a constructor
 	}
@@ -20,8 +22,9 @@ contract FundingHub {
 		return project;
 	}
 
-	function contribute(address project, uint amount) {
+	function contribute(address project) payable {
 		//This function allows users to contribute to a Project identified by its address. contribute calls the fund() function in the individual Project contract and passes on all value attached to the function call.
+		ContributedToProject(project);
 	}
 
 	function getProjectCount() constant returns (uint length) {

@@ -28,6 +28,7 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 			hub = instance;
 			hub.getProjectCount().then(function(count) {
 				if(count.valueOf() > 0) {
+					$scope.projects = [];
 					for (var i = 0; i < count.valueOf(); i++) {
 						hub.getProjectAt(i).
 						then(function(result) {
@@ -49,6 +50,15 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 		var address = $scope.projects[index];
 		Project.at(address)
 		.then(function(project) {
+			$timeout(function() {
+				return web3.eth.getBalance(address, function(error, result) {
+		  			if(!error) {
+		        		$scope.projectBalance = result.valueOf()
+		  			} else {
+		        		$scope.setStatus(error)
+		    		}
+	    		});
+  			});
 			project.campaign().then(function(result) {
 				$timeout(function() {
 					$scope.projectAddress = address;
@@ -80,6 +90,16 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 	    });
 	}
 
+	$scope.contribute = function() {
+		if($scope.contribution !== 0) {
+			FundingHub.deployed().then(function(hub) {
+				return hub.contribute.sendTransaction($scope.projectAddress, {from: $scope.account, value:web3.toWei($scope.contribution, 'ether')})
+				.then(function(trxHash) {
+					console.log(trxHash);
+				})
+			});
+		}
+	}
 
 	$window.onload = function () {
 		if (typeof web3 !== 'undefined') {
@@ -108,6 +128,17 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 
 			$scope.accounts = accs;
 			$scope.account = $scope.accounts[0];
+
+			$timeout(function() {
+				return web3.eth.getBalance($scope.account, function(error, result) {
+		  			if(!error) {
+		        		$scope.accountBalance = result.valueOf()
+		  			}
+		    		else {
+		        		$scope.setStatus(error)
+		    		}
+	    		});
+  			});
 
 			$scope.fetchProjects();
 		})
