@@ -12,7 +12,7 @@ contract Project {
 
 	event ProjectCreated(address owner);
 
-	event FundsReceived(uint amount);
+	event FundsReceived(address funder, uint amount);
 
 	Campaign public campaign;
 
@@ -27,12 +27,12 @@ contract Project {
 
 	mapping (address => uint) balances;
 
-	function fund(uint amount) {
+	function fund(address funder) payable {
 		// This is the function called when the FundingHub receives a contribution. The function must keep track of the contributor and the individual amount contributed. If the contribution was sent after the deadline of the project passed, or the full amount has been reached, the function must return the value to the originator of the transaction and call one of two functions. If the full funding amount has been reached, the function must call payout. If the deadline has passed without the funding goal being reached, the function must call refund.
-		FundsReceived(amount);
+		FundsReceived(funder, msg.value);
 		
-		bool passedDeadline;
-		bool funded = this.balance >= campaign.amount;
+		bool passedDeadline = false;
+		bool funded = (this.balance >= campaign.amount);
 		if(passedDeadline || funded) {
 			if (funded) {
 					payout();
@@ -40,7 +40,7 @@ contract Project {
 					refund();
 				}
 		} else {
-			balances[msg.sender] += amount;
+			balances[funder] += msg.value;
 		}
 	}
 

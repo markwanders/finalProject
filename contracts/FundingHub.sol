@@ -22,9 +22,11 @@ contract FundingHub {
 		return project;
 	}
 
-	function contribute(address project) payable {
+	function contribute(address projectAddress) payable {
 		//This function allows users to contribute to a Project identified by its address. contribute calls the fund() function in the individual Project contract and passes on all value attached to the function call.
-		ContributedToProject(project);
+		ContributedToProject(projectAddress);
+		Project project = Project(projectAddress);
+		project.fund.value(msg.value)(msg.sender);		
 	}
 
 	function getProjectCount() constant returns (uint length) {

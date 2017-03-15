@@ -6,48 +6,61 @@
   <script src="./fundingHubCtrl.js"></script>
 </head>
 <body ng-app="fundingHubApp" ng-controller="fundingHubCtrl" ng-cloak>
-  <h1>FundingHub</h1>
-  <h2>Track your crowdfunding projects</h2>
-  <h3>Active projects:</h3>
-  <ul ng-repeat="x in projects">
-    <li href="#" class="black" id="projects{{$index}}"><a href="#details"  ng-click="getDetails($index)">{{x}}</a></li>
-  </ul>
-  <br>
-  <button id="fetchProjects" ng-click="fetchProjects()">Reload projects</button>
-  <br>
-  <a name="details"></a>
-  <div ng-show="showDetails">
-    <h3>Project details:</h3>
+  <header>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#create">New project</a></li>
+      <li><span><label>Your current balance:</label> {{accountBalance}} ether</span></li>
+    </ul>
+  </header>
+  <main>
+    <h1><a id="home">FundingHub</a></h1>
+    <h2>Track your crowdfunding projects</h2>
+    <h3>Active projects:</h3>
+    <ol>
+      <li ng-repeat="x in projects" href="#" class="black" id="projects{{$index}}"><a href="#details"  ng-click="getDetails($index)">{{x}}</a></li>
+    </ol>
+    <br>
+    <p>
+    <br>
+    <button id="fetchProjects" ng-click="fetchProjects()">Reload projects</button>
+    <br>
+    <div ng-show="showDetails">
+      <h3><a id="details">Project details:</a></h3>
+      <dl>
+        <dt><label for="projectAddress">Address:</label></dt>
+        <dd class="black" id="projectAddress">{{projectAddress}}</dd>
+        <dt><label for="projectOwner">Owner:</label></dt>
+        <dd class="black" id="projectOwner">{{projectOwner}}</dd>
+        <dt><label for="projectAmount">Amount to be raised:</label></dt>
+        <dd class="black" id="projectAmount">{{projectAmount}} ether</dd>
+        <dt><label for="projectAmount">Amount raised so far:</label></dt>
+        <dd class="black" id="projectAmount">{{projectBalance}} ether</dd>
+        <dt><label for="projectDeadline">Deadline for contributions:</label></dt>
+        <dd class="black" id="projectDeadline">{{projectDeadline}} seconds from now</dd>
+        <dt><label for="contribute">Amount to contribute:</label></dt>
+        <dd><input type="number" ng-model="contribution" id="contribution"> ether</dd> 
+      </dl>
+      <br>
+      <button type="button" ng-click="contribute()">Contribute</button>
+    </div>
+    <br>
+    <hr>
+    <br>
+    <h2><a id="create">Create new project</a></h2>
     <dl>
-      <dt><label for="projectAddress">Address:</label></dt><dd class="black" id="projectAddress">{{projectAddress}}</dd><br>
-      <dt><label for="projectOwner">Owner:</label></dt><dd class="black" id="projectOwner">{{projectOwner}}</dd><br>
-      <dt><label for="projectAmount">Amount to be raised:</label></dt><dd class="black" id="projectAmount">{{projectAmount}} ether</dd><br>
-      <dt><label for="projectAmount">Amount raised so far:</label></dt><dd class="black" id="projectAmount">{{projectBalance}} ether</dd><br>
-      <dt><label for="projectDeadline">Deadline for contributions:</label></dt><dd class="black" id="projectDeadline">{{projectDeadline}} seconds from now</dd>
-      <dt><label for="contribute">Amount to contribute:</label></dt>
-      <dd><input type="number" ng-model="contribution" id="contribution"> <button type="button" ng-click="contribute()">Contribute</button></dd>
-      <dt><label for="accountBalance">(Your current balance:)</label></dt><dd>{{accountBalance}} ether</dd>
+      <dt><label for="totalAmount">Total amount: </label></dt>
+      <dd><input type="number" ng-model="totalAmount" id="totalAmount" placeholder="e.g., 95" size="10"></input> ether</dd>
+      <dt><label for="deadline">Deadline: </label></dt>
+      <dd><input type="number" ng-model="deadline" id="deadline" placeholder="e.g., 95" size="10"></input> seconds from now</dd>
     </dl>
-  </div>
-  <br>
-  <br>
-  <h2>Create new project</h1>
-  <table>
-    <tr>
-      <td><label for="totalAmount">Total amount: </label></td>
-      <td><input type="text" ng-model="totalAmount" id="totalAmount" placeholder="e.g., 95" size="10"></input> ether</td>
-    </tr>
-    <tr>
-      <td><label for="deadline">Deadline: </label></td>
-      <td><input type="text" ng-model="deadline" id="deadline" placeholder="e.g., 95" size="10"></input> seconds from now</td>
-    </tr>
-    <tr><td colspan="2"><button id="create" ng-click="createProject()">Create project</button></td></tr>
-  </table>
-  <h3 ng-if="receipt">Transaction receipt: <span class="black">{{receipt}}</span></h3>
-  <br>
-  <br>
-  <span id="status">{{status}}</span>
-  <br>
-  <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
+    <button id="create" ng-click="createProject()">Create project</button>
+    <h3 ng-if="receipt">Transaction receipt: <span class="black">{{receipt}}</span></h3>
+    <br>
+    <br>
+    <span id="status">{{status}}</span>
+    <br>
+    <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
+  </main>
 </body>
 </html>

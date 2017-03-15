@@ -48,24 +48,25 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 
 	$scope.getDetails = function(index) {
 		var address = $scope.projects[index];
+		$scope.selectedProject = index;
 		Project.at(address)
 		.then(function(project) {
 			$timeout(function() {
 				return web3.eth.getBalance(address, function(error, result) {
-		  			if(!error) {
-		        		$scope.projectBalance = result.valueOf()
-		  			} else {
-		        		$scope.setStatus(error)
-		    		}
-	    		});
-  			});
+					if(!error) {
+						$scope.projectBalance = web3.fromWei(result.valueOf(), 'ether')
+					} else {
+						$scope.setStatus(error)
+					}
+				});
+			});
 			project.campaign().then(function(result) {
 				$timeout(function() {
 					$scope.projectAddress = address;
 					$scope.projectOwner = result[0];
 					$scope.projectAmount = result[1].valueOf();
 					$scope.projectDeadline = result[2].valueOf();
-					$scope.showDetails = true;  
+					$scope.showDetails = true;
 				})  
 			})
 		})
@@ -76,18 +77,18 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 	}
 
 	$scope.createProject = function() {
-	    var hub;
+		var hub;
 
-	    FundingHub.deployed().then(function(instance) {
-	      hub = instance;
-	      return hub.createProject.sendTransaction($scope.totalAmount, $scope.deadline, {from: $scope.account, gas: 2000000})
-	      .then(function(value) {
-	        $scope.receipt = value.valueOf();
-	      })
-	    }).catch(function(e) {
-	      console.log(e);
-	      $scope.setStatus("Error creating project; see log.");
-	    });
+		FundingHub.deployed().then(function(instance) {
+			hub = instance;
+			return hub.createProject.sendTransaction($scope.totalAmount, $scope.deadline, {from: $scope.account, gas: 2000000})
+			.then(function(value) {
+				$scope.receipt = value.valueOf();
+			})
+		}).catch(function(e) {
+			console.log(e);
+			$scope.setStatus("Error creating project; see log.");
+		});
 	}
 
 	$scope.contribute = function() {
@@ -96,6 +97,9 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 				return hub.contribute.sendTransaction($scope.projectAddress, {from: $scope.account, value:web3.toWei($scope.contribution, 'ether')})
 				.then(function(trxHash) {
 					console.log(trxHash);
+					//refresh balance and project
+					$scope.getDetails($scope.selectedProject);
+					$scope.getAccountBalance();
 				})
 			});
 		}
@@ -103,49 +107,52 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 
 	$window.onload = function () {
 		if (typeof web3 !== 'undefined') {
-    		console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
+			console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
     		// Use Mist/MetaMask's provider
     		window.web3 = new Web3(web3.currentProvider);
-  		} else {
+    	} else {
     		console.warn("No web3 detected. Falling back to http://localhost:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
     		// fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
     		window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-  		}
+    	}
 
-		FundingHub.setProvider(web3.currentProvider);
-		Project.setProvider(web3.currentProvider);
+    	FundingHub.setProvider(web3.currentProvider);
+    	Project.setProvider(web3.currentProvider);
 
-		web3.eth.getAccounts(function(err, accs) {
-			if (err != null) {
-				alert("There was an error fetching your accounts.");
-				return;
-			}
+    	web3.eth.getAccounts(function(err, accs) {
+    		if (err != null) {
+    			alert("There was an error fetching your accounts.");
+    			return;
+    		}
 
-			if (accs.length == 0) {
-				alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-				return;
-			}
+    		if (accs.length == 0) {
+    			alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+    			return;
+    		}
 
-			$scope.accounts = accs;
-			$scope.account = $scope.accounts[0];
+    		$scope.accounts = accs;
+    		$scope.account = $scope.accounts[0];
 
-			$timeout(function() {
-				return web3.eth.getBalance($scope.account, function(error, result) {
-		  			if(!error) {
-		        		$scope.accountBalance = result.valueOf()
-		  			}
-		    		else {
-		        		$scope.setStatus(error)
-		    		}
-	    		});
-  			});
+    		$scope.getAccountBalance();
+    		$scope.fetchProjects();
+    	})
+    }
 
-			$scope.fetchProjects();
-		})
-	}
+    $scope.setStatus = function(message) {
+    	$scope.status = message;
+    }
 
-	$scope.setStatus = function(message) {
-		$scope.status = message;
-  	}
+    $scope.getAccountBalance = function() {
+    	$timeout(function() {
+    		return web3.eth.getBalance($scope.account, function(error, result) {
+    			if(!error) {
+    				$scope.accountBalance = web3.fromWei(result.valueOf(), 'ether')
+    			}
+    			else {
+    				$scope.setStatus(error)
+    			}
+    		});
+    	});
+    }
 
 }]);

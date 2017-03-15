@@ -1,8 +1,12 @@
 body {
+  font-family: "Open Sans", sans-serif;
+  margin : 0;
+}
+
+main {
   margin-left: 25%;
   margin-right: 25%;
   margin-top: 5%;
-  font-family: "Open Sans", sans-serif;
 }
 
 label {
@@ -56,4 +60,40 @@ h3 {
 
 .hint {
   color: #666;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  padding-left: 25%;
+  overflow: hidden;
+  background-color: #333;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+li {
+  float: left;
+}
+
+ul li span {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+}
+
+ul li a {
+  padding: 14px 16px;
+  display: block;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+ul li a:hover {
+  background-color: blue;
 }
