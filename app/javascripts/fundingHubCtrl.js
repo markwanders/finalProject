@@ -39,10 +39,9 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 					}
 				}
 			})
-			.catch(function(e) {
-				console.log(e);
-				$scope.setStatus("Error getting projects; see log.");
-			})
+		}).catch(function(e) {
+			console.log(e);
+			$scope.setStatus("Error getting projects; see log.");
 		});
 	}
 
@@ -64,7 +63,7 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 				$timeout(function() {
 					$scope.projectAddress = address;
 					$scope.projectOwner = result[0];
-					$scope.projectAmount = result[1].valueOf();
+					$scope.projectAmount = web3.fromWei(result[1].valueOf(), 'ether');
 					$scope.projectDeadline = timeConverter(result[2].valueOf());
 					$scope.showDetails = true;
 					$scope.deadlinePassed = (result[2].valueOf() <= Math.floor(Date.now() / 1000));
@@ -82,11 +81,13 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 
 		FundingHub.deployed().then(function(instance) {
 			hub = instance;
-			return hub.createProject.sendTransaction($scope.totalAmount, $scope.deadline, {from: $scope.account, gas: 2000000})
+			return hub.createProject.sendTransaction(web3.toWei($scope.totalAmount, 'ether'), $scope.deadline, {from: $scope.account, gas: 2000000})
 			.then(function(value) {
 				$timeout(function() {
 					$scope.receipt = value.valueOf();
-				});			})
+					$scope.fetchProjects();
+				});			
+			})
 		}).catch(function(e) {
 			console.log(e);
 			$scope.setStatus("Error creating project; see log.");
