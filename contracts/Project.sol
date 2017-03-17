@@ -16,13 +16,13 @@ contract Project {
 
 	Campaign public campaign;
 
-	function Project(uint amount, uint deadline) {
+	function Project(address owner, uint amount, uint deadline) {
 		//Project is the contract that stores all the data of each project. Project should have a constructor and a struct to store the following information:
 		//the address of the owner of the project
 		//the amount to be raised (eg 100000 wei)
 		//the deadline, i.e. the time until when the amount has to be raised
-		campaign = Campaign(msg.sender, amount, deadline);
-		ProjectCreated(msg.sender);
+		campaign = Campaign(owner, amount, deadline);
+		ProjectCreated(owner);
 	}
 
 	mapping (address => uint) balances;
@@ -30,18 +30,15 @@ contract Project {
 	function fund(address funder) payable {
 		// This is the function called when the FundingHub receives a contribution. The function must keep track of the contributor and the individual amount contributed. If the contribution was sent after the deadline of the project passed, or the full amount has been reached, the function must return the value to the originator of the transaction and call one of two functions. If the full funding amount has been reached, the function must call payout. If the deadline has passed without the funding goal being reached, the function must call refund.
 		FundsReceived(funder, msg.value);
-		
-		bool passedDeadline = false;
+		balances[funder] += msg.value;
+		bool passedDeadline = (now >= campaign.deadline);
 		bool funded = (this.balance >= campaign.amount);
-		if(passedDeadline || funded) {
-			if (funded) {
-					payout();
-				} else {
-					refund();
-				}
-		} else {
-			balances[funder] += msg.value;
+		if (funded) {
+			payout();
+		} else if(passedDeadline) {
+			refund();
 		}
+		
 	}
 
 	function payout() {

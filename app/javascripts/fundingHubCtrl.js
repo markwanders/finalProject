@@ -19,8 +19,8 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 	$scope.accounts = [];
 	$scope.account;
 	$scope.projects = [];
-	$scope.totalAmount = 95;
-	$scope.deadline = 95;
+	$scope.totalAmount = 10;
+	$scope.deadline = 600;
 
 	$scope.fetchProjects = function() {
 		var hub;
@@ -65,8 +65,9 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 					$scope.projectAddress = address;
 					$scope.projectOwner = result[0];
 					$scope.projectAmount = result[1].valueOf();
-					$scope.projectDeadline = result[2].valueOf();
+					$scope.projectDeadline = timeConverter(result[2].valueOf());
 					$scope.showDetails = true;
+					$scope.deadlinePassed = (result[2].valueOf() <= Math.floor(Date.now() / 1000));
 				})  
 			})
 		})
@@ -83,8 +84,9 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 			hub = instance;
 			return hub.createProject.sendTransaction($scope.totalAmount, $scope.deadline, {from: $scope.account, gas: 2000000})
 			.then(function(value) {
-				$scope.receipt = value.valueOf();
-			})
+				$timeout(function() {
+					$scope.receipt = value.valueOf();
+				});			})
 		}).catch(function(e) {
 			console.log(e);
 			$scope.setStatus("Error creating project; see log.");
@@ -96,11 +98,13 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
 			FundingHub.deployed().then(function(hub) {
 				return hub.contribute.sendTransaction($scope.projectAddress, {from: $scope.account, value:web3.toWei($scope.contribution, 'ether')})
 				.then(function(trxHash) {
-					console.log(trxHash);
 					//refresh balance and project
 					$scope.getDetails($scope.selectedProject);
 					$scope.getAccountBalance();
 				})
+			}).catch(function(e) {
+				console.log(e);
+				$scope.setStatus("Error contributing funds; see log.");
 			});
 		}
 	}
@@ -139,7 +143,11 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
     }
 
     $scope.setStatus = function(message) {
+    	$timeout(function() {
+    		$scope.showStatus = true;
     	$scope.status = message;
+    	})
+    	
     }
 
     $scope.getAccountBalance = function() {
@@ -155,4 +163,17 @@ app.controller("fundingHubCtrl", [ '$scope', '$window', '$timeout', function($sc
     	});
     }
 
+    //found at http://stackoverflow.com/a/6078873
+    function timeConverter(UNIX_timestamp){
+    	var a = new Date(UNIX_timestamp * 1000);
+    	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    	var year = a.getFullYear();
+    	var month = months[a.getMonth()];
+    	var date = a.getDate();
+    	var hour = a.getHours();
+    	var min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes(); 
+    	var sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
+    	var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    	return time;
+    }
 }]);
