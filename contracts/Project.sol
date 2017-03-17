@@ -5,7 +5,7 @@ contract Project {
 	struct Campaign {
 		address owner;
 
-		uint amount;
+		uint goal;
 
 		uint deadline;
 	}
@@ -13,30 +13,33 @@ contract Project {
 	Campaign public campaign;
 
 	mapping (address => uint) balances;
-	mapping (uint => address) balanceIndex;
+	address[] funders;
 
 	bool private passedDeadline;
 	bool private funded;
 
-	function Project(address owner, uint amount, uint deadline) {
+	function Project(address owner, uint goal, uint deadline) {
 		//Project is the contract that stores all the data of each project. Project should have a constructor and a struct to store the following information:
 		//the address of the owner of the project
 		//the amount to be raised (eg 100000 wei)
 		//the deadline, i.e. the time until when the amount has to be raised
-		campaign = Campaign(owner, amount, deadline);
+		campaign = Campaign(owner, goal, deadline);
 	}
 
 	function fund(address funder) payable public {
 		// This is the function called when the FundingHub receives a contribution. The function must keep track of the contributor and the individual amount contributed. If the contribution was sent after the deadline of the project passed, or the full amount has been reached, the function must return the value to the originator of the transaction and call one of two functions. If the full funding amount has been reached, the function must call payout. If the deadline has passed without the funding goal being reached, the function must call refund.
 
 		passedDeadline = (now >= campaign.deadline);
-		funded = (this.balance >= campaign.amount);
+		funded = (this.balance >= campaign.goal);
 		if (funded) {
 			refund(funder, msg.value);
 			payout();
 		} else if(passedDeadline) {
 			refund();
 		} else {
+			if(balances[funder] == 0) { //this is a new funder, add to the list
+				funders.push(funder);
+			}
 			balances[funder] += msg.value;
 		}
 	}
@@ -50,12 +53,17 @@ contract Project {
 
 	function refund() private {
 		//This function sends all individual contributions back to the respective contributor, or lets all contributors retrieve their contributions.
+		for(uint i = 0; i < funders.length; i++) {
+			refund(funders[i], balances[funders[i]]);
+		}
 	}
 
 	function refund(address receiver, uint amount) private {
 		//This function sends an individual contribution back to the respective contributor
 		if(!receiver.send(amount)) {
 			throw;
+		} else {
+			balances[receiver] -= amount;
 		}
 	}
 }
