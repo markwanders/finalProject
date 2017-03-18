@@ -3,7 +3,7 @@ var Project = artifacts.require("./contracts/Project.sol");
 
 contract("FundingHub", function(accounts) {
 
-  it("Should return the project created during migration", function() {
+  xit("Should return the project created during migration", function() {
 
     return FundingHub.deployed().then(function(hub) {
           // now check the count
@@ -24,20 +24,20 @@ contract("FundingHub", function(accounts) {
   it("Should return all funds to respective funders when deadline passes without reaching funding goal", function() {
     this.timeout(20000);
 
-    var accountBalance = web3.eth.getBalance(accounts[0]);
-    console.log("Current account balance is:", web3.fromWei(accountBalance.valueOf(), 'ether'));    
+    var initialBalance = web3.eth.getBalance(accounts[0]);
+    console.log("Initial account balance is:", web3.fromWei(initialBalance.valueOf(), 'ether'));    
     return FundingHub.deployed().then(function(hub) {
       return hub.getProjectAt(0).then(function(projectAddress) {
         return Project.at(projectAddress).then(function(project) {
           return project.campaign().then(function(campaign) {
-            console.log("The project campaign deadline is: ", campaign[2].valueOf());
-            assert.isBelow(campaign[2].valueOf() - 11, Math.floor(Date.now() / 1000), "The campaign deadline is within 10 seconds from now");
+            console.log("The project campaign deadline is: ", new Date(1000 * campaign[2].valueOf()));
+            assert.isBelow(campaign[2].valueOf() - 6, Math.floor(Date.now() / 1000), "The campaign deadline is within 5 seconds from now");
             return project.fund.sendTransaction(accounts[0], {from: accounts[0], value: web3.toWei(.99, 'ether')}).then(function(trxHash) {
               return web3.eth.getTransactionReceiptMined(trxHash).then(function() {
                 var newBalance = web3.eth.getBalance(accounts[0]);
-                console.log("New account balance is now:", web3.fromWei(newBalance.valueOf(), 'ether'));
+                console.log("New account balance is:", web3.fromWei(newBalance.valueOf(), 'ether'));
                 var projectBalance =  web3.eth.getBalance(projectAddress);
-                console.log("New project balance is now:", web3.fromWei(projectBalance.valueOf(), 'ether'));
+                console.log("New project balance is:", web3.fromWei(projectBalance.valueOf(), 'ether'));
                 //wait for the project to expire, then try to fund again
                 setTimeout(function() {
                  return project.fund.sendTransaction(accounts[0], {from: accounts[0], value: web3.toWei(.99, 'ether')}).then(function(trxHash) {
@@ -47,11 +47,12 @@ contract("FundingHub", function(accounts) {
                     assert.equal(projectBalance.valueOf(), 0, "The project balance is not empty");
                     var refundedBalance = web3.eth.getBalance(accounts[0]);
                     console.log("Account balance after refund is: ", web3.fromWei(refundedBalance.valueOf(), 'ether'));
-                    assert.isAbove(refundedBalance, newBalance, 'Refunded balance is not higher than before refund')
+                    assert.isAbove(refundedBalance, newBalance, 'Refunded balance is not higher than before refund');
+                    assert.isBelow((web3.fromWei(initialBalance.valueOf()) - web3.fromWei(refundedBalance.valueOf())), 0.05, "Difference between initial and refunded balance is too high")
                     //N.B.: of course, not the entire amount gets refunded, as the transactions themselves costed gas
                   })
                 })
-               }, 10000);
+               }, 5);
               })
             })
           })
@@ -60,7 +61,7 @@ contract("FundingHub", function(accounts) {
     })
   })
 
-  it("Should be able to create a new project", function() {
+  xit("Should be able to create a new project", function() {
 
     return FundingHub.deployed().then(function(hub) {
           // now check the count
