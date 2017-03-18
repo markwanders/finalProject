@@ -1,4 +1,4 @@
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.2;
 
 contract Project {
 
@@ -30,14 +30,15 @@ contract Project {
 		// This is the function called when the FundingHub receives a contribution. The function must keep track of the contributor and the individual amount contributed. If the contribution was sent after the deadline of the project passed, or the full amount has been reached, the function must return the value to the originator of the transaction and call one of two functions. If the full funding amount has been reached, the function must call payout. If the deadline has passed without the funding goal being reached, the function must call refund.
 
 		passedDeadline = (now >= campaign.deadline);
-		funded = (this.balance >= campaign.goal);
+		funded = (funded || (this.balance >= campaign.goal)); //keep track of funded status; we don't want the project to become unfunded after payout
 		if (funded) {
-			refund(funder, msg.value);
+			refund(funder, msg.value - (this.balance - campaign.goal)); //only refund the part of the contribution that puts the campaign over the goal
 			payout();
 		} else if(passedDeadline) {
+			refund(funder, msg.value); //refund the entire contribution
 			refund();
 		} else {
-			if(balances[funder] == 0) { //this is a new funder, add to the list
+			if(balances[funder] == 0) { //this is a new funder, add to the tracking list
 				funders.push(funder);
 			}
 			balances[funder] += msg.value;
@@ -46,7 +47,7 @@ contract Project {
 
 	function payout() private {
 		//This is the function that sends all funds received in the contract to the owner of the project.
-		if(!campaign.owner.send(this.balance)) {
+		if(this.balance != 0 && !campaign.owner.send(this.balance)) {
 			throw;
 		}
 	}

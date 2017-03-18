@@ -1,4 +1,4 @@
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.2;
 
 import "./Project.sol";
 
@@ -17,7 +17,7 @@ contract FundingHub {
 		return project;
 	}
 
-	function contribute(address projectAddress) payable returns(bool) {
+	function contribute(address projectAddress) payable {
 		//This function allows users to contribute to a Project identified by its address. contribute calls the fund() function in the individual Project contract and passes on all value attached to the function call.
 		Project project = Project(projectAddress);
 		project.fund.value(msg.value)(msg.sender);
