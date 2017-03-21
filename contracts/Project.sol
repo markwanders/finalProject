@@ -31,17 +31,18 @@ contract Project {
 
 		passedDeadline = (now >= campaign.deadline);
 		funded = (funded || (this.balance >= campaign.goal)); //keep track of funded status; we don't want the project to become unfunded after payout
-		if (funded) {
+
+		if(balances[funder] == 0) { //this is a new funder, add to the tracking list
+				funders.push(funder);
+		}
+		balances[funder] += msg.value;
+
+		if (funded && !passedDeadline) {
 			refund(funder, msg.value - (this.balance - campaign.goal)); //only refund the part of the contribution that puts the campaign over the goal
 			payout();
 		} else if(passedDeadline) {
 			refund(funder, msg.value); //refund the entire contribution
 			refund();
-		} else {
-			if(balances[funder] == 0) { //this is a new funder, add to the tracking list
-				funders.push(funder);
-			}
-			balances[funder] += msg.value;
 		}
 	}
 
