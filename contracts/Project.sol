@@ -19,53 +19,58 @@ contract Project {
 	bool private funded;
 
 	function Project(address owner, uint goal, uint deadline) {
-		//Project is the contract that stores all the data of each project. Project should have a constructor and a struct to store the following information:
-		//the address of the owner of the project
-		//the amount to be raised (eg 100000 wei)
-		//the deadline, i.e. the time until when the amount has to be raised
+	//Project is the contract that stores all the data of each project. Project should have a constructor and a struct to store the following information:
+	//the address of the owner of the project
+	//the amount to be raised (eg 100000 wei)
+	//the deadline, i.e. the time until when the amount has to be raised
 		campaign = Campaign(owner, goal, deadline);
 	}
 
 	function fund(address funder) payable public {
-		// This is the function called when the FundingHub receives a contribution. The function must keep track of the contributor and the individual amount contributed. If the contribution was sent after the deadline of the project passed, or the full amount has been reached, the function must return the value to the originator of the transaction and call one of two functions. If the full funding amount has been reached, the function must call payout. If the deadline has passed without the funding goal being reached, the function must call refund.
+	// This is the function called when the FundingHub receives a contribution. The function must keep track of the contributor and the individual amount contributed. If the contribution was sent after the deadline of the project passed, or the full amount has been reached, the function must return the value to the originator of the transaction and call one of two functions. If the full funding amount has been reached, the function must call payout. If the deadline has passed without the funding goal being reached, the function must call refund.
 
 		passedDeadline = (now >= campaign.deadline);
-		funded = (funded || (this.balance >= campaign.goal)); //keep track of funded status; we don't want the project to become unfunded after payout
+		funded = (this.balance >= campaign.goal);
 
 		if(balances[funder] == 0) { //this is a new funder, add to the tracking list
-				funders.push(funder);
+			funders.push(funder);
 		}
 		balances[funder] += msg.value;
 
-		if (funded && !passedDeadline) {
-			refund(funder, msg.value - (this.balance - campaign.goal)); //only refund the part of the contribution that puts the campaign over the goal
+		 if (funded && !passedDeadline) {
 			payout();
 		} else if(passedDeadline) {
-			refund(funder, msg.value); //refund the entire contribution
-			refund();
+			refundAll();
 		}
 	}
 
 	function payout() private {
-		//This is the function that sends all funds received in the contract to the owner of the project.
+	//This is the function that sends all funds received in the contract to the owner of the project.
+	//We could also selfdestruct() the contract here, but then people might still send ether to it from the frontend, which would then be lost forever
 		if(this.balance != 0 && !campaign.owner.send(this.balance)) {
 			throw;
 		}
 	}
 
-	function refund() private {
-		//This function sends all individual contributions back to the respective contributor, or lets all contributors retrieve their contributions.
+	function refundAll() private {
+	//This function sends all individual contributions back to the respective contributor
 		for(uint i = 0; i < funders.length; i++) {
 			refund(funders[i], balances[funders[i]]);
 		}
 	}
 
 	function refund(address receiver, uint amount) private {
-		//This function sends an individual contribution back to the respective contributor
+	//This function sends an individual contribution back to the respective contributor
+		balances[receiver] -= amount;
 		if(!receiver.send(amount)) {
 			throw;
-		} else {
-			balances[receiver] -= amount;
+		}
+	}
+
+	function refund() public {
+	//This function lets an individual contributor refund their contribution
+		if(balances[msg.sender] > 0) {
+			refund(msg.sender, balances[msg.sender]);
 		}
 	}
 }
