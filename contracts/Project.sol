@@ -17,6 +17,7 @@ contract Project {
 
 	bool private passedDeadline;
 	bool private funded;
+	bool private inactive;
 
 	function Project(address owner, uint goal, uint deadline) {
 	//Project is the contract that stores all the data of each project. Project should have a constructor and a struct to store the following information:
@@ -32,15 +33,20 @@ contract Project {
 		passedDeadline = (now >= campaign.deadline);
 		funded = (this.balance >= campaign.goal);
 
-		if(balances[funder] == 0) { //this is a new funder, add to the tracking list
+		if(balances[funder] == 0) { //this is a new funder, add to the tracking list. This introduces a slight 'bug' in that a user who contributes and then refunds would get added to the list of contributors again, resulting in duplicate entries in the array. However, since the balances are kept in a mapping (i.e. with a unique entry), this does not cause any practical issues
 			funders.push(funder);
 		}
 		balances[funder] += msg.value;
 
-		 if (funded && !passedDeadline) {
+		if(inactive) {
+			refund(funder, msg.value); //Project already funded or expired, refund entire contribution
+		} else if (funded && !passedDeadline) {
+			inactive = true;
+			refund(funder, (this.balance - campaign.goal)); //only refund the part of the contribution that puts the campaign over the goal
 			payout();
 		} else if(passedDeadline) {
 			refundAll();
+			inactive = true;
 		}
 	}
 
@@ -61,7 +67,7 @@ contract Project {
 
 	function refund(address receiver, uint amount) private {
 	//This function sends an individual contribution back to the respective contributor
-		balances[receiver] -= amount;
+		balances[receiver] -= amount; // Prevent re-entry by updating balance first
 		if(!receiver.send(amount)) {
 			throw;
 		}
